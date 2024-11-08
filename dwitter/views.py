@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import DweetForm
 from .models import Dweet, Profile
@@ -12,15 +12,25 @@ def dashboard(request):
             dweet.user = request.user
             dweet.save()
             return redirect("dwitter:dashboard")
-        
+    
+    # Get dweets from users that the current user follows
+    # and order them by creation time
     followed_dweets = Dweet.objects.filter(
         user__profile__in=request.user.profile.follows.all()
     ).order_by("-created_at")
 
+    liked_by_followed_all = []
+    for dweet in followed_dweets:
+        liked_by_followed_all.append({
+            "dweet": dweet,
+            "liked_by_followed": dweet.likes.filter(profile__in=request.user.profile.follows.all()),
+            "liked_by_user": request.user in dweet.likes.all()
+        })
+
     return render(
         request,
         "dwitter/dashboard.html",
-        {"form": form, "dweets": followed_dweets}
+        {"form": form, "liked_by_followed_all": liked_by_followed_all}
     )
 
 
@@ -45,3 +55,12 @@ def profile(request, pk):
             current_user_profile.follows.remove(profile)
         current_user_profile.save()
     return render(request, "dwitter/profile.html", {"profile": profile})
+
+
+def like_dweet(request, dweet_id):
+    dweet = get_object_or_404(Dweet, id=dweet_id)
+    if request.user in dweet.likes.all():
+        dweet.likes.remove(request.user)
+    else:
+        dweet.likes.add(request.user)
+    return redirect('dwitter:dashboard')

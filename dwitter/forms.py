@@ -2,7 +2,6 @@ from django import forms
 
 from .models import Dweet
 
-
 class DweetForm(forms.ModelForm):
     body = forms.CharField(
         required=True,
@@ -13,8 +12,8 @@ class DweetForm(forms.ModelForm):
             }
         ),
         label="",
-        )
+    )
 
     class Meta:
         model = Dweet
-        exclude = ("user", )
+        exclude = ("user", "likes")  # 排除'user'和'likes'字段

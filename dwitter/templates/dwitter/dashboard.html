@@ -4,21 +4,53 @@
 
 {% block content %}
 
-Hello, {{ user.username|default:'Guest' }}!
 
 <div class="column">
-    {% for dweet in dweets %}
+
+    {% for item in liked_by_followed_all%}
     <div class="box">
-        {{dweet.body}}
+        {{ item.dweet.body }}
         <span class="is-small has-text-grey-light">
-            ({{ dweet.created_at }} by {{ dweet.user.username }}
+            [{{ item.dweet.created_at }} by {{ item.dweet.user.username }}]
         </span>
+
+        <form action="{% url 'dwitter:like_dweet' item.dweet.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="button is-small is-white">
+                {% if item.liked_by_user %}
+                    <span class="icon has-text-danger">
+                        <i class="fas fa-heart"></i>
+                    </span>
+                {% else %}
+                    <span class="icon has-text-grey-light">
+                        <i class="far fa-heart"></i>
+                    </span>
+                {% endif %}
+            </button>
+        </form>
+
+        <div>
+            {% for like in item.liked_by_followed%}
+                {{ like.username }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+            
+            {% if item.dweet.likes.count != 0 %}
+                等{{ item.dweet.likes.count }}人like该Dweet
+            {% endif %}
+
+        </div>
+
     </div>
     {% endfor %}
+
 </div>
 
 
 <div class="column is-one-third">
+
+    <div class="notification is-primary">
+        Hello, {{ user.username|default:'Guest' }}!
+    </div>
 
     <div class="block">
         <a href="{% url 'dwitter:profile_list' %} ">

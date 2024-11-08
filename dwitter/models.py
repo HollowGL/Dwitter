@@ -35,6 +35,7 @@ class Dweet(models.Model):
     )
     body = models.CharField(max_length=140)
     created_at = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(User, related_name="liked_dweets", blank=True)
 
     def __str__(self):
         return (
@@ -42,3 +43,12 @@ class Dweet(models.Model):
             f"({self.created_at:%Y-%m-%d %H:%M}): "
             f"{self.body[:30]}..."
         )
+
+
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    dweet = models.ForeignKey(Dweet, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'dweet')

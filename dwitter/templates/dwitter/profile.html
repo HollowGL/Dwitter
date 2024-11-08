@@ -36,6 +36,23 @@
                 <span class="is-small has-text-grey-light">
                     ({{ dweet.created_at }})
                 </span>
+                <div>
+                    {% if dweet.likes.count == 0 %}
+                        <span class="icon has-text-grey-light">
+                            <i class="far fa-heart"></i>
+                        </span>
+
+                    {% else %}
+                        <span class="icon has-text-danger">
+                            <i class="fas fa-heart"></i>
+                        </span>
+                        {% for like in dweet.likes.all %}
+                            {% if forloop.first%}: {% endif %}
+                            {{ like.username }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+
+                    {% endif %}
+                </div>
             </div>
         {% endfor %}
     </div>
