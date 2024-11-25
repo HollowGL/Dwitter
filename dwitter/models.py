@@ -52,3 +52,17 @@ class Like(models.Model):
 
     class Meta:
         unique_together = ('user', 'dweet')
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    dweet = models.ForeignKey(Dweet, related_name="comments", on_delete=models.CASCADE)
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return (
+            f"{self.user} "
+            f"({self.created_at:%Y-%m-%d %H:%M}): "
+            f"{self.body[:30]}..."
+        )

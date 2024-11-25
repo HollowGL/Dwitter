@@ -1,16 +1,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
 
-from .forms import DweetForm
-from .models import Dweet, Profile
+from .forms import DweetForm, CommentForm
+from .models import Dweet, Profile, Comment
 
 
 def dashboard(request):
     form = DweetForm(request.POST or None)
+    comment_form = CommentForm(request.POST or None)
     if request.method == "POST":
         if form.is_valid():
             dweet = form.save(commit=False)
             dweet.user = request.user
             dweet.save()
+            return redirect("dwitter:dashboard")
+        elif comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.user = request.user
+            comment.dweet = get_object_or_404(Dweet, id=request.POST.get("dweet_id"))
+            comment.save()
             return redirect("dwitter:dashboard")
     
     # Get dweets from users that the current user follows
@@ -30,7 +37,7 @@ def dashboard(request):
     return render(
         request,
         "dwitter/dashboard.html",
-        {"form": form, "liked_by_followed_all": liked_by_followed_all}
+        {"form": form, "comment_form": comment_form, "liked_by_followed_all": liked_by_followed_all}
     )
 
 

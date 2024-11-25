@@ -4,47 +4,70 @@
 
 {% block content %}
 
-
 <div class="column">
 
-    {% for item in liked_by_followed_all%}
+    {% for item in liked_by_followed_all %}
     <div class="box">
-        {{ item.dweet.body }}
+        <strong class="is-size-5">{{ item.dweet.body }}</strong>
         <span class="is-small has-text-grey-light">
-            [{{ item.dweet.created_at }} by {{ item.dweet.user.username }}]
+            [{{ item.dweet.created_at }} by <strong>{{ item.dweet.user.username }}</strong>]
         </span>
 
-        <form action="{% url 'dwitter:like_dweet' item.dweet.id %}" method="post">
+        <div style="display: flex; align-items: center;">
+            <form action="{% url 'dwitter:like_dweet' item.dweet.id %}" method="post" style="margin-right: 10px;">
             {% csrf_token %}
             <button type="submit" class="button is-small is-white">
                 {% if item.liked_by_user %}
-                    <span class="icon has-text-danger">
-                        <i class="fas fa-heart"></i>
-                    </span>
+                <span class="icon has-text-danger">
+                    <i class="fas fa-heart"></i>
+                </span>
                 {% else %}
-                    <span class="icon has-text-grey-light">
-                        <i class="far fa-heart"></i>
-                    </span>
+                <span class="icon has-text-grey-light">
+                    <i class="far fa-heart"></i>
+                </span>
                 {% endif %}
             </button>
-        </form>
+            </form>
+
+            <button class="button is-small is-light" onclick="toggleCommentForm('{{ item.dweet.id }}')">
+                <span class="icon">
+                    <i class="far fa-comment"></i>
+                </span>
+            </button>
+        </div>
 
         <div>
-            {% for like in item.liked_by_followed%}
+            {% for like in item.liked_by_followed %}
                 {{ like.username }}{% if not forloop.last %}, {% endif %}
             {% endfor %}
             
             {% if item.dweet.likes.count != 0 %}
-                等{{ item.dweet.likes.count }}人like该Dweet
+                等{{ item.dweet.likes.count }}人点赞
             {% endif %}
-
         </div>
+
+        <div>
+            {% if item.dweet.comments.all %}
+                <div class="box" style="background-color: #f5f5f5;">
+                    {% for comment in item.dweet.comments.all %}
+                        <p><strong>{{ comment.user.username }}</strong>: {{ comment.body }}</p>
+                    {% endfor %}
+                </div> 
+            {% endif %}
+        </div>
+
+
+        <form id="comment-form-{{ item.dweet.id }}" action="{% url 'dwitter:dashboard' %}" method="post" style="display:none;">
+            {% csrf_token %}
+            {{ comment_form.as_p }}
+            <input type="hidden" name="dweet_id" value="{{ item.dweet.id }}">
+            <button type="submit" class="button is-small is-primary">Comment</button>
+        </form>
 
     </div>
     {% endfor %}
 
 </div>
-
 
 <div class="column is-one-third">
 
@@ -86,3 +109,16 @@
 </div>
 
 {% endblock content %}
+
+{% block extra_js %}
+<script>
+    function toggleCommentForm(dweetId) {
+        var form = document.getElementById('comment-form-' + dweetId);
+        if (form.style.display === 'none' || form.style.display === '') {
+            form.style.display = 'block';
+        } else {
+            form.style.display = 'none';
+        }
+    }
+</script>
+{% endblock extra_js %}

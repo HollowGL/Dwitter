@@ -32,7 +32,7 @@
     <div class="content">
         {% for dweet in profile.user.dweets.all %}
             <div class="box">
-                {{ dweet.body }}
+                <strong class="is-size-5">{{ dweet.body }}</strong>
                 <span class="is-small has-text-grey-light">
                     ({{ dweet.created_at }})
                 </span>
@@ -47,10 +47,23 @@
                             <i class="fas fa-heart"></i>
                         </span>
                         {% for like in dweet.likes.all %}
-                            {% if forloop.first%}: {% endif %}
                             {{ like.username }}{% if not forloop.last %}, {% endif %}
                         {% endfor %}
 
+                        {% if dweet.likes.count != 0 %}
+                            等{{ dweet.likes.count }}人点赞
+                        {% endif %}
+
+                    {% endif %}
+                </div>
+
+                <div>
+                    {% if dweet.comments.all %}
+                        <div class="box" style="background-color: #f5f5f5;">
+                            {% for comment in dweet.comments.all %}
+                                <p><strong>{{ comment.user.username }}</strong>: {{ comment.body }}</p>
+                            {% endfor %}
+                        </div> 
                     {% endif %}
                 </div>
             </div>
